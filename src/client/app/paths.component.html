@@ -1,0 +1,161 @@
+<div (keydown)="onKeydown($event)" (keyup)="onKeyup($event)" >
+  <table  (keydown)="onKeydown($event)" (keyup)="onKeyup($event)"  width=100%>
+    <tr ><td nowrap >
+    <h1>SAP Labs Munich and CX Upskilling</h1>
+  </td><td> </td><td  nowrap valign=bottom align=right>
+    <button (click)="copyToClipboard()">Copy deeplink to clipboard</button><br>
+    Search: <input  [(ngModel)]="searchTerm" placeholder="searchTerm"  (keyup)="toggleMe(null)" appAutoFocus /><br>
+    <span  *ngIf="editting"  (click)="editting = !editting;" href="">Readonly/<u>Contribute</u></span>
+    <span  *ngIf="!editting"  (click)="editting = !editting;;" href=""><u>Readonly</u>/Contribute</span>
+
+  </td></tr></table>
+  Crowd sourcing material for upkilling our colleagues. (<a href="https://cxwiki.sap.com/display/prodandtech/Software+Academy+2021+Filling+our+Skills+Gaps">more</a>)
+<table>
+<tr>
+  <td>
+    <table>
+      <tr><td valign=top> Filters:</td><td colspan=3 valign=top><button (click)="clearAll()">Clear all</button></td></tr>
+      <tr><td valign=top>Tags:</td><td colspan=3 valign=top><code class="tags"  *ngFor="let tag of tagsArray" ><button name="{{ tag }}" class="" (click)="toggleMe($event)"> {{ tag }}</button> </code></td></tr>
+      <tr><td valign=top>Types:</td> <td colspan=3  valign=top><code class="tags" *ngFor="let type of typesArray" ><button name="{{ type }}" class="" (click)="toggleMe($event)"> {{ type }}</button> </code></td></tr>
+      <tr><td valign=top>Recommenders:</td><td colspan=3  valign=top><code class="tags" *ngFor="let recommender of recommendersArray" ><button name="{{ recommender }}" class="" (click)="toggleMe($event)"> {{ recommender }}</button> </code></td></tr>
+      <tr>
+      <td valign=top>Branches: </td>
+      <td valign=top><code class="tags" *ngFor="let tree of treesArray" ><button name="{{ tree }}" class="" (click)="toggleMe($event)"> {{ tree }}</button><br> </code></td>
+      <td valign=top>
+        [Hold shift to disable mouseover (click <a href="/" onclick="return false;">here</a> if not working)]
+        <table>
+          <tr>
+            <td valign=top>
+              <table>
+                <tr>
+                  <td align=middle valign=middle>
+                    <code *ngFor="let step of paths; let i = index" (mouseenter)="onSelect(step.uid)" [class.selected]="step === selectedStep"><a class="align-top"  target="_blank" href="{{ step.Url }}"><img *ngIf="!step.Thumb" id="{{step.uid}}" alt=refreshPage  name="{{ step.Tags }} {{ step.Type }} {{ step.Tree }}  {{ step.Recommender }}"  src="assets/images/gray.png"  width=30 height=30/><img *ngIf="step.Thumb"  id="{{step.uid}}" alt=refreshPage  name="{{ step.Tags }} {{ step.Type }} {{ step.Tree }}  {{ step.Recommender }}"  src="{{step.Thumb }}"   width=30 height=30/></a></code>
+                  </td>
+                </tr>
+              </table>
+              <table >
+                <tr>
+                  <td nowrap>
+                    <span  *ngIf="editting" >
+                      New material: <input [attr.disabled]="!editting ? '': null"  [(ngModel)]="newMaterialUrl" placeholder="newMaterialUrl" />
+                      <button [attr.disabled]="!editting ? '': null" (click)="prepareNewStep()">Prepare New Step</button>
+                    </span>
+                  </td>
+                  </tr>
+                  </table>
+
+              <div *ngIf="selectedStep">
+                <table width=100%>
+                  <tr>
+                    <td>
+                      <table width=100%>
+                        <tr>
+                          <td>Title: </td><td>
+                           <input maxlength="200" [attr.disabled]="!editting ? '': null" size="50" [(ngModel)]="selectedStep.Title" placeholder="Title" />
+                         </td></tr>
+                         <tr>
+                           <td  valign=top>
+                           Description: </td><td>
+                           <textarea maxlength="500" [attr.disabled]="!editting ? '': null" rows="4" cols="50" [(ngModel)]="selectedStep.Description" placeholder="Description" ></textarea>
+                         </td></tr>
+                         <tr><td>
+                           Tag(s): </td><td>
+                           <input maxlength="200" [attr.disabled]="!editting ? '': null" size="50" [(ngModel)]="selectedStep.Tags" placeholder="Tags" />
+                         </td></tr>
+                         <tr><td>
+                           Branch(es): </td><td>
+                           <input maxlength="200"  [attr.disabled]="!editting ? '': null" size="50" [(ngModel)]="selectedStep.Tree" placeholder="Tree" />
+                         </td></tr>
+                         <tr><td>
+                           Thumb: </td><td>
+                           <input maxlength="200" [attr.disabled]="!editting ? '': null" size="50" [(ngModel)]="selectedStep.Thumb" placeholder="Thumb" />
+                          </td></tr>
+                         <tr><td>
+                          <a class="align-top"  target="_blank" href="{{ selectedStep.Url }}">Url: </a></td><td>
+                           <input [attr.disabled]="!editting ? '': null" size="50" [(ngModel)]="selectedStep.Url" placeholder="Url" />
+                         </td></tr>
+                         <tr><td>
+                           Type(s): </td><td>
+                           <input maxlength="200" [attr.disabled]="!editting ? '': null" size="50" [(ngModel)]="selectedStep.Type" placeholder="Type" />
+                         </td></tr>
+                         <tr><td>
+                           Recommender(s): </td><td>
+                           <input maxlength="200" [attr.disabled]="!editting ? '': null" size="50" [(ngModel)]="selectedStep.Recommender" placeholder="Type" />
+                         </td></tr>
+                         <tr *ngIf="editting" >
+                          <td></td><td>
+                           <button (click)="cancel()">Cancel</button>
+                           <button (click)="save()">Save</button>
+                           <button (click)="deleteStep()">Delete</button>
+                          </td>
+                        </tr>
+                        </table>
+                    </td>
+                    <td valign=top align=left width="200px">
+                      <a class="align-top"  target="_blank" href="{{ selectedStep.Url }}"><img *ngIf="!selectedStep.Thumb"  alt=largeThumb  class="" src="assets/images/gray.png"  style="max-width: 100px;" /></a>
+                      <a class="align-top"  target="_blank" href="{{ selectedStep.Url }}"><img *ngIf="selectedStep.Thumb"  alt=largeThumb  class="" src="{{selectedStep.Thumb }}"  style="max-width: 100px;" /></a>
+                    </td>
+
+                  </tr>
+                </table>
+        </div>
+      </td>
+
+    </tr>
+  </table>
+
+
+      </td>
+      <td nowrap valign=top>Paths:<br>
+        KymaOnboarding:<br>
+        <button (click)="toggleUrlStringParams('?id=cf3194f0-586c-4559-834a-1fbbf2473082')">1</button>
+        <button (click)="toggleUrlStringParams('?id=9d6600a9-1b56-4646-a02b-9d405268fd6b')">2</button><br>
+        CCVOnboarding:<br>
+        <button (click)="toggleUrlStringParams('?id=3ac9522b-3470-4b5f-b7b8-b2f6e71d268a')">1</button>
+        <button (click)="toggleUrlStringParams('?id=cf3194f0-586c-4559-834a-1fbbf2473082')">2</button><br>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+
+<tr><td align=middle></td></tr>
+</table>
+
+<table width=100%>
+  <tr>
+    <td>
+      Your IP: {{ ipAddress }}   | Questions/feedback? Contact ken.lomax@sap.com | Show Json? <input  type="checkbox" [checked]="showjson"(change)="showjson = !showjson"/>
+     </td>
+  </tr>
+  </table>
+
+  <p  *ngIf="showjson">{{ paths | json }}</p>
+</div>
+
+<div cdkDropListGroup>
+  <div class="example-container">
+    <h2>Available items</h2>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="items"
+      class="example-list"
+      cdkDropListSortingDisabled
+      (cdkDropListDropped)="drop($event)">
+      <div class="example-box" *ngFor="let item of items" cdkDrag>{{item}}</div>
+    </div>
+  </div>
+
+  <div class="example-container">
+    <h2>Shopping basket</h2>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="basket"
+      class="example-list"
+      (cdkDropListDropped)="drop($event)">
+      <div class="example-box" *ngFor="let item of basket" cdkDrag>{{item}}</div>
+    </div>
+  </div>
+</div>
